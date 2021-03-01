@@ -7,62 +7,69 @@ import java.util.Stack;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO
+ * @description TODO 进制转换
  * @since 2021/3/1 14:37
  */
 public class HexUtil {
-    private static final char[] CHAR_SET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".toCharArray();
     /**
-     * 将10进制转化为62进制
-     *
-     * @param number 数
-     * @return 返回字符串
+     * 在进制表示中的字符集合，0-Z分别用于表示最大为62进制的符号表示
      */
-    public static String convertDecimalToBase62(long number) {
-        Stack<Character> stack = new Stack<Character>();
-        StringBuilder result = new StringBuilder(0);
-        while (number != 0) {
-            stack.add(CHAR_SET[new Long((number - (number / 62) * 62)).intValue()]);
-            number = number / 62;
+    private static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+            'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+            'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
+
+    private static final Integer DECIMAL = 10;
+
+    /**
+     * 将十进制的数字转换为指定进制的字符串
+     *
+     * @param number 十进制的数字
+     * @param seed   指定的进制
+     * @return 指定进制的字符串
+     */
+    public static String convertTo(long number, int seed) {
+        if (number < 0) {
+            number = ((long) 2 * 0x7fffffff) + number + 2;
         }
-        while (!stack.isEmpty()) {
-            result.append(stack.pop());
+        char[] buf = new char[32];
+        int charPos = 32;
+        while ((number / seed) > 0) {
+            buf[--charPos] = DIGITS[(int) (number % seed)];
+            number /= seed;
         }
-        return result.toString();
+        buf[--charPos] = DIGITS[(int) (number % seed)];
+        return new String(buf, charPos, (32 - charPos));
     }
 
-
     /**
-     * 将62进制转换成10进制数
+     * 将其它进制的数字（字符串形式）转换为十进制的数字
      *
-     * @param ident62 62进制
-     * @return 10进制
+     * @param number 其它进制的数字（字符串形式）
+     * @param seed   指定的进制，也就是参数str的原始进制
+     * @return 十进制的数字
      */
-    public static String convertBase62ToDecimal(String ident62) {
-        int decimal = 0;
-        int base = 62;
-        int keisu = 0;
-        int cnt = 0;
+    public static long revertToLong(String number, int seed) {
+        char[] charBuf = number.toCharArray();
+        if (seed == DECIMAL) {
+            return Long.parseLong(number);
+        }
 
-        byte ident[] = ident62.getBytes();
-        for (int i = ident.length - 1; i >= 0; i--) {
-            int num = 0;
-            if (ident[i] > 48 && ident[i] <= 57) {
-                num = ident[i] - 48;
-            } else if (ident[i] >= 65 && ident[i] <= 90) {
-                num = ident[i] - 65 + 10;
-            } else if (ident[i] >= 97 && ident[i] <= 122) {
-                num = ident[i] - 97 + 10 + 26;
+        long result = 0, base = 1;
+
+        for (int i = charBuf.length - 1; i >= 0; i--) {
+            int index = 0;
+            for (int j = 0, length = DIGITS.length; j < length; j++) {
+                //找到对应字符的下标，对应的下标才是具体的数值
+                if (DIGITS[j] == charBuf[i]) {
+                    index = j;
+                }
             }
-            keisu = (int) java.lang.Math.pow((double) base, (double) cnt);
-            decimal += num * keisu;
-            cnt++;
+            result += index * base;
+            base *= seed;
         }
-        return String.format("%08d", decimal);
+        return result;
     }
 
-    public static void main(String[] args) {
-        System.out.println(HexUtil.convertDecimalToBase62(1));
-        System.out.println(HexUtil.convertBase62ToDecimal("1"));
-    }
 }

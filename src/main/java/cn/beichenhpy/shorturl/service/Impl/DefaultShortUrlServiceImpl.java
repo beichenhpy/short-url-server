@@ -5,11 +5,14 @@ import cn.beichenhpy.shorturl.model.UrlInfo;
 import cn.beichenhpy.shorturl.mapper.ShortUrlMapper;
 import cn.beichenhpy.shorturl.service.IShortUrlService;
 import cn.beichenhpy.shorturl.util.HexUtil;
+import cn.beichenhpy.shorturl.util.SnowFlake;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -22,9 +25,11 @@ import java.util.List;
 public class DefaultShortUrlServiceImpl extends ServiceImpl<ShortUrlMapper,UrlInfo> implements IShortUrlService {
 
     private final ShortUrlMapper shortUrlMapper;
+    private final SnowFlake idWorker;
 
-    public DefaultShortUrlServiceImpl(ShortUrlMapper shortUrlMapper){
+    public DefaultShortUrlServiceImpl(ShortUrlMapper shortUrlMapper,@Qualifier(value = "idWorker") SnowFlake idWorker){
         this.shortUrlMapper = shortUrlMapper;
+        this.idWorker = idWorker;
     }
 
     @Override
@@ -48,9 +53,7 @@ public class DefaultShortUrlServiceImpl extends ServiceImpl<ShortUrlMapper,UrlIn
             //重复返回第一个
             return repeatList.get(0).getShortUrl();
         }else {
-            //查询最新的id
-            long maxId = shortUrlMapper.selectOne(new QueryWrapper<UrlInfo>().orderByDesc("id").last("limit 1")).getId();
-            String shortUrl = HexUtil.convertDecimalToBase62(maxId + 1);
+            String shortUrl = HexUtil.convertTo(idWorker.nextId(), 62);
             urlInfo.setShortUrl(shortUrl);
             shortUrlMapper.insert(urlInfo);
             return shortUrl;
