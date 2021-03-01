@@ -16,7 +16,12 @@ import javax.annotation.Resource;
 import java.time.Duration;
 
 import static java.util.Collections.singletonMap;
-
+/**
+ * @author beichenhpy
+ * @version 1.0
+ * @description TODO
+ * @since 2021/3/1 11:05
+ */
 @Configuration
 @EnableCaching // 开启缓存支持
 public class RedisConfig extends CachingConfigurerSupport {
@@ -25,8 +30,8 @@ public class RedisConfig extends CachingConfigurerSupport {
 	/**
 	 * 缓存配置管理器
 	 *
-	 * @param factory
-	 * @return
+	 * @param factory 工厂
+	 * @return 返回缓存管理
 	 */
 	@Bean
 	public CacheManager cacheManager(LettuceConnectionFactory factory) {

@@ -1,5 +1,7 @@
 package cn.beichenhpy.shorturl.filter;
 
+import cn.beichenhpy.shorturl.config.BlackUrlLoad;
+import cn.beichenhpy.shorturl.constant.UnParsingPath;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -22,9 +24,8 @@ public class BlackUrlFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) servletRequest;
         String contextPath = req.getServletPath();
-        //todo 将会使用黑名单配置类代替
-        if ("/favicon.ico".equals(contextPath)){
-            log.warn("跳过执行");
+        if (UnParsingPath.FAV.equals(contextPath)){
+            log.warn("不解析无用短链接");
         }else {
             filterChain.doFilter(servletRequest, servletResponse);
         }

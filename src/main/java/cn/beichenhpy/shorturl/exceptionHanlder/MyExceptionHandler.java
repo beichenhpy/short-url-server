@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 public class MyExceptionHandler{
     @ExceptionHandler(NoSuchUrlException.class)
     public void globalException(HttpServletResponse response, NoSuchUrlException ex){
-        //重定向到错误页
+        //TODO 重定向到错误页
         response.setStatus(301);
         response.setHeader("Location","https://www.baidu.com");
     }

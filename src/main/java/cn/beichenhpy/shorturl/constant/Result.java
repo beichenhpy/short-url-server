@@ -5,7 +5,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * @author A51398
+ * @author beichenhpy
  * @param <T>
  */
 @Data

@@ -11,10 +11,10 @@ import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Spring Boot 2.0 解决跨域问题
- *
- * @Author qinfeng
- *
+ * @author beichenhpy
+ * @version 1.0
+ * @description TODO webMVC设置跨域
+ * @since 2021/3/1 11:05
  */
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
