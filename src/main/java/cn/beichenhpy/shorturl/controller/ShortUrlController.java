@@ -1,10 +1,12 @@
 package cn.beichenhpy.shorturl.controller;
 
-import org.springframework.http.HttpStatus;
+import cn.beichenhpy.shorturl.constant.Result;
+import cn.beichenhpy.shorturl.model.UrlInfo;
+import cn.beichenhpy.shorturl.service.IShortUrlService;
+import cn.beichenhpy.shorturl.util.HexUtil;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -17,13 +19,24 @@ import javax.servlet.http.HttpServletResponse;
 @Controller
 public class ShortUrlController {
 
+    private final IShortUrlService defaultShortUrlServiceImpl;
+
+    public ShortUrlController(@Qualifier(value = "defaultShortUrlServiceImpl") IShortUrlService defaultShortUrlServiceImpl){
+        this.defaultShortUrlServiceImpl = defaultShortUrlServiceImpl;
+    }
+
     @RequestMapping("/{path}")
     public void returnShort(@PathVariable("path") String path, HttpServletResponse response){
-        String fullUrl = null;
-        if ("1".equals(path)){
-            fullUrl = "https://www.baidu.com";
-        }
+        UrlInfo originUrl = defaultShortUrlServiceImpl.getOriginUrl(path);
         response.setStatus(301);
-        response.setHeader("Location",fullUrl);
+        response.setHeader("Location",originUrl.getOriginUrl());
     }
+
+    @PostMapping("/add")
+    @ResponseBody
+    public Result<?> add(@RequestBody UrlInfo urlInfo){
+        String shortUrl = defaultShortUrlServiceImpl.addUrlInfo(urlInfo);
+        return Result.ok(shortUrl);
+    }
+
 }
