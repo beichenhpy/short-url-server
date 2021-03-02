@@ -14,10 +14,11 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO 控制层
+ * @description TODO 控制层 可以在nginx反向代理一下 使用域名 proxy_pass localhost:9999/api
  * @since 2021/3/1 11:05
  */
 @Controller
+@RequestMapping("/api")
 public class ShortUrlController {
 
     private final IShortUrlService defaultShortUrlServiceImpl;
