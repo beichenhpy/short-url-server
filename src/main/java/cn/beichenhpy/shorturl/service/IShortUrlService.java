@@ -15,7 +15,7 @@ public interface IShortUrlService extends IService<UrlInfo> {
      * @param shortUrl 短url
      * @return 返回url信息
      */
-    UrlInfo getOriginUrl(String shortUrl);
+    String getOriginUrl(String shortUrl);
 
     /**
      * 新增短链接信息

@@ -1,9 +1,9 @@
 package cn.beichenhpy.shorturl.controller;
 
 import cn.beichenhpy.shorturl.constant.Result;
+import cn.beichenhpy.shorturl.exception.NoSuchUrlException;
 import cn.beichenhpy.shorturl.model.UrlInfo;
 import cn.beichenhpy.shorturl.service.IShortUrlService;
-import cn.beichenhpy.shorturl.util.HexUtil;
 import cn.beichenhpy.shorturl.util.UrlValid;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
@@ -25,12 +25,14 @@ public class ShortUrlController {
     public ShortUrlController(@Qualifier(value = "defaultShortUrlServiceImpl") IShortUrlService defaultShortUrlServiceImpl){
         this.defaultShortUrlServiceImpl = defaultShortUrlServiceImpl;
     }
-
     @RequestMapping("/{path}")
     public void returnShort(@PathVariable("path") String path, HttpServletResponse response){
-        UrlInfo originUrl = defaultShortUrlServiceImpl.getOriginUrl(path);
-        response.setStatus(301);
-        response.setHeader("Location",originUrl.getOriginUrl());
+        String originUrl = defaultShortUrlServiceImpl.getOriginUrl(path);
+        if (originUrl == null){
+            throw new NoSuchUrlException();
+        }
+        response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+        response.setHeader("Location",originUrl);
     }
 
     @PostMapping("/add")
@@ -45,5 +47,4 @@ public class ShortUrlController {
             return Result.error("错误的链接或被禁用的链接");
         }
     }
-
 }

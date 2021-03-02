@@ -25,7 +25,7 @@ public class BlackUrlLoad implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         ClassPathResource pathResource = new ClassPathResource("static/blackUrls.txt");
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(pathResource.getInputStream()));
-        String str = null;
+        String str;
         if ((str = bufferedReader.readLine()) != null){
             BLACK_URLS.add(str);
         }
