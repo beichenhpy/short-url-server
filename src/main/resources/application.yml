@@ -4,7 +4,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/test?currentSchema=short-url
     username: beichen
-    password: hanpengyu
+    password: beichen
     driver-class-name: org.postgresql.Driver
   redis:
     database: 0
