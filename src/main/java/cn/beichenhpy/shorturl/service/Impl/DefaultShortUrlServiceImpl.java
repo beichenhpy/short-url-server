@@ -9,6 +9,7 @@ import cn.beichenhpy.shorturl.util.RedisUtil;
 import cn.beichenhpy.shorturl.util.SnowFlake;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -23,6 +24,7 @@ import java.util.List;
  * @description TODO
  * @since 2021/3/1 14:00
  */
+@Slf4j
 @Service
 public class DefaultShortUrlServiceImpl extends ServiceImpl<ShortUrlMapper, UrlInfo> implements IShortUrlService {
 
@@ -44,6 +46,7 @@ public class DefaultShortUrlServiceImpl extends ServiceImpl<ShortUrlMapper, UrlI
         boolean isExistKey = redisUtil.hasKey(CACHE_PATH + shortUrl);
         if (isExistKey) {
             //读取key
+            log.info("存在Key:直接读取redis缓存");
             originUrl = String.valueOf(redisUtil.get(CACHE_PATH + shortUrl));
         } else {
             QueryWrapper<UrlInfo> query = new QueryWrapper<>();
@@ -53,6 +56,7 @@ public class DefaultShortUrlServiceImpl extends ServiceImpl<ShortUrlMapper, UrlI
             if (urlInfo != null) {
                 originUrl = urlInfo.getOriginUrl();
                 redisUtil.set(CACHE_PATH + shortUrl, originUrl,60*30);
+                log.info("未缓存:设置key");
             }
         }
         return originUrl;
