@@ -14,7 +14,7 @@ public class SnowFlake {
     /**
      * 开始时间戳，这样可以减少id长度
      */
-    private final static long START_STAMP = 1614588357000L;
+    private final static long START_STAMP = 1614838853411L;
     /**
      * 每一部分占用的位数
      */
