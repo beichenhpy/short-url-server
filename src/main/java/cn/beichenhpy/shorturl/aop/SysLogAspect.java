@@ -48,13 +48,11 @@ public class SysLogAspect {
     @Around("pointCut()")
     public Object around(ProceedingJoinPoint point) throws Throwable {
         long startTime = System.currentTimeMillis();
-        Object proceed = point.proceed();
-        long endTime = System.currentTimeMillis();
-        doLog(endTime-startTime,point);
-        return proceed;
+        doLog(startTime,point);
+        return point.proceed();
     }
 
-    private void doLog(long time,ProceedingJoinPoint point){
+    private void doLog(long startTime,ProceedingJoinPoint point){
         //获取注解修饰的方法
         String value = "";
         MethodSignature signature = (MethodSignature) point.getSignature();
@@ -72,10 +70,11 @@ public class SysLogAspect {
         //获取参数
         String params = getParams(httpServletRequest, point);
         Date createTime = new Date();
+        long entTime = System.currentTimeMillis();
         //新建日志实体类
         SysLogModal sysLogModal = SysLogModal.builder()
                 .createTime(createTime)
-                .costTime(time).ip(ipAddr)
+                .costTime(entTime - startTime).ip(ipAddr)
                 .methodRemark(value)
                 .methodName(methodName)
                 .requestParams(params)
@@ -89,7 +88,7 @@ public class SysLogAspect {
                 "方法耗时：{} ms\n" +
                 "方法参数为：{} \n"+
                 "请求时间：{}\n"+
-                "<<<<<<<<<<<<<日志记录执行结束>>>>>>>>>>>>>",ipAddr,methodName,value,time,params,createTime);
+                "<<<<<<<<<<<<<日志记录执行结束>>>>>>>>>>>>>",ipAddr,methodName,value,entTime - startTime,params,createTime);
     }
 
     public String getParams(HttpServletRequest request,ProceedingJoinPoint joinPoint){
