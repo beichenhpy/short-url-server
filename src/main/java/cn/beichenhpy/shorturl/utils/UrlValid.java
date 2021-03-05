@@ -1,4 +1,4 @@
-package cn.beichenhpy.shorturl.util;
+package cn.beichenhpy.shorturl.utils;
 
 import cn.beichenhpy.shorturl.config.BlackUrlLoad;
 

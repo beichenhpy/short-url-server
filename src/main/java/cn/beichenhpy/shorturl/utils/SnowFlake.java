@@ -1,6 +1,4 @@
-package cn.beichenhpy.shorturl.util;
-
-import org.springframework.stereotype.Component;
+package cn.beichenhpy.shorturl.utils;
 
 /**
  * @ClassName SnowFlake 推特雪花算法生成唯一ID

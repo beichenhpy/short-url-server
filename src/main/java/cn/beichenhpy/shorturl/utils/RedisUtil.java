@@ -1,4 +1,4 @@
-package cn.beichenhpy.shorturl.util;
+package cn.beichenhpy.shorturl.utils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;

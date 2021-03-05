@@ -1,8 +1,4 @@
-package cn.beichenhpy.shorturl.util;
-
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Stack;
+package cn.beichenhpy.shorturl.utils;
 
 /**
  * @author beichenhpy
