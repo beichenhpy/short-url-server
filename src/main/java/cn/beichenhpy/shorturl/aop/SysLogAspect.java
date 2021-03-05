@@ -1,6 +1,8 @@
 package cn.beichenhpy.shorturl.aop;
 
 import cn.beichenhpy.shorturl.anno.SysLog;
+import cn.beichenhpy.shorturl.mapper.SysLogMapper;
+import cn.beichenhpy.shorturl.model.SysLogModal;
 import cn.beichenhpy.shorturl.utils.IpUtil;
 import cn.beichenhpy.shorturl.utils.SpringContextUtils;
 import com.alibaba.fastjson.JSONObject;
@@ -12,15 +14,18 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
+import java.util.Date;
 
 /**
  * @author beichenhpy
@@ -33,6 +38,8 @@ import java.lang.reflect.Method;
 @Component
 public class SysLogAspect {
 
+    @Resource
+    private SysLogMapper sysLogMapper;
     @Pointcut("@annotation(cn.beichenhpy.shorturl.anno.SysLog)")
     public void pointCut() {
 
@@ -64,14 +71,25 @@ public class SysLogAspect {
         }
         //获取参数
         String params = getParams(httpServletRequest, point);
+        Date createTime = new Date();
+        //新建日志实体类
+        SysLogModal sysLogModal = SysLogModal.builder()
+                .createTime(createTime)
+                .costTime(time).ip(ipAddr)
+                .methodRemark(value)
+                .methodName(methodName)
+                .requestParams(params)
+                .build();
         //todo 插入数据库
+        sysLogMapper.insert(sysLogModal);
         log.info("\n<<<<<<<<<<<<<日志记录开始执行>>>>>>>>>>>>>\n" +
                 "请求ip：{} \n"+
                 "正在执行：{} 方法\n" +
                 "sysLog记录备注内容：{} \n" +
                 "方法耗时：{} ms\n" +
                 "方法参数为：{} \n"+
-                "<<<<<<<<<<<<<日志记录执行结束>>>>>>>>>>>>>",ipAddr,methodName,value,time,params);
+                "请求时间：{}\n"+
+                "<<<<<<<<<<<<<日志记录执行结束>>>>>>>>>>>>>",ipAddr,methodName,value,time,params,createTime);
     }
 
     public String getParams(HttpServletRequest request,ProceedingJoinPoint joinPoint){
