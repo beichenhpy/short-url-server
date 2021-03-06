@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author beichenhpy
- * @description todo url验证
+ * @description url验证
  */
 public class UrlValid {
     private final static String URL_REGEX = "(http|https)://(\\w+:?\\w*@)?(\\S+)(:[0-9]+)?(/|/([\\w#!:.?+=&%@\\-/]))?";

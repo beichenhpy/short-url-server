@@ -22,7 +22,7 @@ import static java.util.Collections.singletonMap;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO
+ * @description redis配置
  * @since 2021/3/1 11:05
  */
 @Configuration

@@ -16,7 +16,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO 加载黑名单到全局变量
+ * @description 加载黑名单到全局变量
  * @since 2021/3/1 11:05
  */
 @Component
@@ -24,6 +24,7 @@ public class BlackUrlLoad implements ApplicationRunner {
     public static final Set<String> BLACK_URLS = new CopyOnWriteArraySet<>();
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        //TODO 后续可能使用网络文件读取
         ClassPathResource pathResource = new ClassPathResource("static/blackUrls.txt");
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(pathResource.getInputStream()));
         String str;

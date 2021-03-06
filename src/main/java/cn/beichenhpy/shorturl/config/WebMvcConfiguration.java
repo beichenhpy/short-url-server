@@ -13,7 +13,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO webMVC设置跨域
+ * @description webMVC设置跨域
  * @since 2021/3/1 11:05
  */
 @Configuration

@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO
+ * @description
  * @since 2021/3/1 13:59
  */
 public interface IShortUrlService extends IService<UrlInfo> {

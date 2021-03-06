@@ -12,7 +12,7 @@ import java.util.Date;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO 日志实体类
+ * @description 日志实体类
  * @since 2021/3/5 11:05
  */
 @TableName("sys_log")

@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO
+ * @description 异常处理类
  * @since 2021/3/1 15:54
  */
 @Slf4j
@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 public class MyExceptionHandler{
     @ExceptionHandler(NoSuchUrlException.class)
     public void globalException(HttpServletResponse response, NoSuchUrlException ex){
-        //清缓存
         ResponseTo301.return301(response, ResponseConstant.NOT_FOUND_URL);
     }
 }

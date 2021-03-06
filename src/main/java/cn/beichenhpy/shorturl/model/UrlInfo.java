@@ -9,7 +9,7 @@ import lombok.Data;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO 实体类
+ * @description url 实体类
  * @since 2021/3/1 11:05
  */
 @Data

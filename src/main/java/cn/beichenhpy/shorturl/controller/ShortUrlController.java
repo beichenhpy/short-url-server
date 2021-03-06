@@ -18,6 +18,23 @@ import javax.servlet.http.HttpServletResponse;
  * @author beichenhpy
  * @version 1.0
  * @description TODO 控制层 可以在nginx反向代理一下 使用域名 proxy_pass localhost:9999/api
+ * nginx配置:
+    server {
+        listen      80;
+        server_name   你的域名;
+        charset utf-8;
+        location / {
+            proxy_set_header   X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header   Host      $http_host;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_pass         http://0.0.0.0:9999/api/;
+        }
+    }
+ *
+ *
  * @since 2021/3/1 11:05
  */
 @Controller
