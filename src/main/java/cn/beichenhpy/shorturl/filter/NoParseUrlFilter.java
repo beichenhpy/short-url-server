@@ -1,6 +1,7 @@
 package cn.beichenhpy.shorturl.filter;
 
 import cn.beichenhpy.shorturl.constant.ResponseConstant;
+import cn.beichenhpy.shorturl.utils.IpUtil;
 import cn.beichenhpy.shorturl.utils.ResponseTo301;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,8 @@ import java.util.Map;
  * @author beichenhpy
  * @version 1.0
  * @description 过滤某些请求
+ * 不会记录在数据库中，相当于跳过某些请求，不进入controller
+ * 这样可以节省数据库资源或者一些不必要的风险
  * @since 2021/3/1 15:23
  */
 @Component
@@ -42,12 +45,17 @@ public class NoParseUrlFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) servletRequest;
         String contextPath = req.getServletPath();
+        String ipAddr = IpUtil.getIpAddr(req);
         /*  条件说明
          *  parseMap.size() > 0 用于判断Map是否为空，不为空才能进行下一步判断
          *  parseMap.containsKey(contextPath) 进行查询path是否需要进行判断 第一个满足才会执行
          *  parseMap.get(contextPath) 对需要进行判断的path判断是否放行（根据value的值） 前两个满足才会执行
          */
         if (parseFilterMap.size() > 0 && parseFilterMap.containsKey(contextPath) && parseFilterMap.get(contextPath)) {
+            log.info("\n<<<<<<<<<<<<<过滤Filter记录开始执行>>>>>>>>>>>>>\n" +
+                    "请求ip：{} \n"+
+                    "请求关键路径：{} \n"+
+                    "<<<<<<<<<<<<<过滤Filter记录结束执行>>>>>>>>>>>>>",ipAddr,contextPath);
             ResponseTo301.return301((HttpServletResponse) servletResponse, ResponseConstant.NOT_FOUND_URL);
         } else {
             filterChain.doFilter(servletRequest, servletResponse);
