@@ -3,7 +3,6 @@ package cn.beichenhpy.shorturl.filter;
 import cn.beichenhpy.shorturl.constant.ResponseConstant;
 import cn.beichenhpy.shorturl.utils.ResponseTo301;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
@@ -11,7 +10,8 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author beichenhpy
@@ -21,38 +21,52 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 @Slf4j
-@WebFilter(filterName = "blackUrlFilter",urlPatterns = "/*")
+@WebFilter(filterName = "blackUrlFilter", urlPatterns = "/*")
 public class NoParseUrlFilter implements Filter {
-    private final ConcurrentHashMap<String, Boolean> parseMap = new ConcurrentHashMap<>();
-    /**初始化筛选Map*/
+    /**
+     * 是否过滤的Map
+     * key:path
+     * value: true:过滤 false:不过滤
+     */
+    private final Map<String, Boolean> parseFilterMap = new HashMap<>();
+
+    /**
+     * 初始化筛选Map
+     */
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        putInMap();
+        initParseMap();
     }
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) servletRequest;
         String contextPath = req.getServletPath();
-        //先判断链接是否在需要筛选的Map中 并且 能get出来，这里主要针对 短链接请求可能会有多种不在map中的
-        if (parseMap.containsKey(contextPath) && parseMap.get(contextPath)){
+        /*  条件说明
+         *  parseMap.size() > 0 用于判断Map是否为空，不为空才能进行下一步判断
+         *  parseMap.containsKey(contextPath) 进行查询path是否需要进行判断 第一个满足才会执行
+         *  parseMap.get(contextPath) 对需要进行判断的path判断是否放行（根据value的值） 前两个满足才会执行
+         */
+        if (parseFilterMap.size() > 0 && parseFilterMap.containsKey(contextPath) && parseFilterMap.get(contextPath)) {
             ResponseTo301.return301((HttpServletResponse) servletResponse, ResponseConstant.NOT_FOUND_URL);
-        }else {
+        } else {
             filterChain.doFilter(servletRequest, servletResponse);
         }
     }
 
     /**
-     * 将是否进行判断的url放入
+     * 将是否进行过滤的url放入
      */
-    private void putInMap(){
-       parseMap.put("/api/favicon.ico",true);
-       parseMap.put("/api/robots.txt",true);
-       parseMap.put("/api/wcm",true);
-       parseMap.put("/api/phpmyadmin",true);
-       parseMap.put("/api/phpMyAdmin",true);
-       parseMap.put("/api/4e5e5d7364f443e28fbf0d3ae744a59a",true);
-       parseMap.put("/api/env",true);
-       parseMap.put("/api/add",false);
+    private void initParseMap() {
+        /*过滤*/
+        parseFilterMap.put("/api/favicon.ico", true);
+        parseFilterMap.put("/api/robots.txt", true);
+        parseFilterMap.put("/api/wcm", true);
+        parseFilterMap.put("/api/phpmyadmin", true);
+        parseFilterMap.put("/api/phpMyAdmin", true);
+        parseFilterMap.put("/api/4e5e5d7364f443e28fbf0d3ae744a59a", true);
+        parseFilterMap.put("/api/env", true);
+        /*不过滤*/
+        parseFilterMap.put("/api/add", false);
     }
 }
