@@ -5,11 +5,13 @@ import cn.beichenhpy.shorturl.constant.Result;
 import cn.beichenhpy.shorturl.exception.NoSuchUrlException;
 import cn.beichenhpy.shorturl.model.UrlInfo;
 import cn.beichenhpy.shorturl.service.IShortUrlService;
+import cn.beichenhpy.shorturl.utils.ResponseTo301;
 import cn.beichenhpy.shorturl.utils.UrlValid;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -22,11 +24,9 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/api")
 public class ShortUrlController {
 
-    private final IShortUrlService defaultShortUrlServiceImpl;
+    @Resource(name = "defaultShortUrlServiceImpl")
+    private IShortUrlService defaultShortUrlServiceImpl;
 
-    public ShortUrlController(@Qualifier(value = "defaultShortUrlServiceImpl") IShortUrlService defaultShortUrlServiceImpl){
-        this.defaultShortUrlServiceImpl = defaultShortUrlServiceImpl;
-    }
     @SysLog(value = "请求短链接api")
     @GetMapping("/{path}")
     public void returnShort(@PathVariable("path") String path, HttpServletResponse response){
@@ -34,12 +34,7 @@ public class ShortUrlController {
         if (originUrl == null){
             throw new NoSuchUrlException();
         }
-        //禁用浏览器缓存
-        response.setHeader("Cache-control", "no-cache");
-        response.setHeader("pragma", "no-cache");
-        response.setDateHeader("expires", -1);
-        response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-        response.setHeader("Location",originUrl);
+        ResponseTo301.return301(response,originUrl);
     }
 
     @SysLog(value = "添加短链接")

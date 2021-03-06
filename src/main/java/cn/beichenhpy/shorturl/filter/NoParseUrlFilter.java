@@ -1,13 +1,14 @@
 package cn.beichenhpy.shorturl.filter;
 
-import cn.beichenhpy.shorturl.config.BlackUrlLoad;
-import cn.beichenhpy.shorturl.constant.UnParsingPath;
+import cn.beichenhpy.shorturl.constant.ResponseConstant;
+import cn.beichenhpy.shorturl.utils.ResponseTo301;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -19,13 +20,18 @@ import java.io.IOException;
 @Component
 @Slf4j
 @WebFilter(filterName = "blackUrlFilter",urlPatterns = "/*")
-public class BlackUrlFilter implements Filter {
+public class NoParseUrlFilter implements Filter {
+    /**
+     * 不解析的servletPath
+     * todo 后续可能放入数据库？
+     */
+    private static final String FAV = "/api/favicon.ico";
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) servletRequest;
         String contextPath = req.getServletPath();
-        if (UnParsingPath.FAV.equals(contextPath)){
-            log.warn("不解析无用短链接");
+        if (FAV.equals(contextPath)){
+            ResponseTo301.return301((HttpServletResponse) servletResponse, ResponseConstant.NOT_FOUND_URL);
         }else {
             filterChain.doFilter(servletRequest, servletResponse);
         }

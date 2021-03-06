@@ -15,6 +15,8 @@ comment on column "short-url".url_info.origin_url is '原始url';
 alter table "short-url".url_info
     owner to beichen;
 
+create index url_info_origin_url_index
+    on "short-url".url_info (origin_url);
 -- sys_log
 create table "short-url".sys_log
 (

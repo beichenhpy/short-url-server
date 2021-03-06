@@ -9,6 +9,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -26,8 +27,10 @@ public class BlackUrlLoad implements ApplicationRunner {
         ClassPathResource pathResource = new ClassPathResource("static/blackUrls.txt");
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(pathResource.getInputStream()));
         String str;
-        if ((str = bufferedReader.readLine()) != null){
-            BLACK_URLS.add(str);
+        while ((str = bufferedReader.readLine()) != null){
+            //以逗号分割
+            String[] split = str.split(",");
+            BLACK_URLS.addAll(Arrays.asList(split));
         }
         bufferedReader.close();
     }
