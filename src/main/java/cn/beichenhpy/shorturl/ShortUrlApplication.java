@@ -16,6 +16,6 @@ public class ShortUrlApplication {
     }
     @Bean("idWorker")
     SnowFlake snowFlake(){
-        return new SnowFlake(1);
+        return new SnowFlake(1,1);
     }
 }

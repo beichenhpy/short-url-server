@@ -1,6 +1,8 @@
 package cn.beichenhpy.shorturl.filter;
 
 import cn.beichenhpy.shorturl.constant.ResponseConstant;
+import cn.beichenhpy.shorturl.exception.NoSuchUrlException;
+import cn.beichenhpy.shorturl.utils.HexUtil;
 import cn.beichenhpy.shorturl.utils.IpUtil;
 import cn.beichenhpy.shorturl.utils.ResponseTo301;
 import lombok.extern.slf4j.Slf4j;
@@ -47,18 +49,47 @@ public class NoParseUrlFilter implements Filter {
         String contextPath = req.getServletPath();
         String ipAddr = IpUtil.getIpAddr(req);
         /*  条件说明
+            这里的判断 对已经在parseFilterMap中的path
+            相当于是对一些不需要过滤的进行判断或者一些已经确定一定要过滤的进行过滤
          *  parseMap.size() > 0 用于判断Map是否为空，不为空才能进行下一步判断
          *  parseMap.containsKey(contextPath) 进行查询path是否需要进行判断 第一个满足才会执行
-         *  parseMap.get(contextPath) 对需要进行判断的path判断是否放行（根据value的值） 前两个满足才会执行
+         *  parseMap.get(contextPath) 对需要进行判断的path判断是否放行（根据value的值）
          */
-        if (parseFilterMap.size() > 0 && parseFilterMap.containsKey(contextPath) && parseFilterMap.get(contextPath)) {
-            log.info("\n<<<<<<<<<<<<<过滤Filter记录开始执行>>>>>>>>>>>>>\n" +
-                    "请求ip：{} \n"+
-                    "请求关键路径：{} \n"+
-                    "<<<<<<<<<<<<<过滤Filter记录结束执行>>>>>>>>>>>>>",ipAddr,contextPath);
-            ResponseTo301.return301((HttpServletResponse) servletResponse, ResponseConstant.NOT_FOUND_URL);
+        if (parseFilterMap.size() > 0 && parseFilterMap.containsKey(contextPath)) {
+            if (parseFilterMap.get(contextPath)) {
+                log.info("\n<<<<<<<<<<<<<过滤Filter By Map记录开始执行>>>>>>>>>>>>>\n" +
+                        "请求ip：{} \n" +
+                        "请求关键路径：{} \n" +
+                        "<<<<<<<<<<<<<过滤Filter By Map记录结束执行>>>>>>>>>>>>>", ipAddr, contextPath);
+                ResponseTo301.return301((HttpServletResponse) servletResponse, ResponseConstant.NOT_FOUND_URL);
+            } else {
+                log.info("<<<<<<<<<<<<<通过Map检测|允许通过>>>>>>>>>>>>>");
+                filterChain.doFilter(servletRequest, servletResponse);
+            }
         } else {
-            filterChain.doFilter(servletRequest, servletResponse);
+            /* 条件是：Map为空/请求的path不包含在key中
+              这里防止DDos对数据库负载
+              增加对短链接的逆向判断
+              如果为雪花算法生成，转换为10进制长度应该为18/19
+             */
+            //去除prefix /api
+            String pureContext = contextPath.substring(contextPath.substring(contextPath.indexOf("/") + 1).indexOf("/") + 2);
+            //尝试decode 62to10
+            try {
+                long decodeNum = HexUtil.revertToLong(pureContext, 62);
+                if (String.valueOf(decodeNum).length() == 13) {
+                    log.info("<<<<<<<<<<<<<长度满足|允许通过>>>>>>>>>>>>>");
+                    filterChain.doFilter(servletRequest, servletResponse);
+                } else {
+                    log.info("\n<<<<<<<<<<<<<过滤Filter By decode记录开始执行>>>>>>>>>>>>>\n" +
+                            "请求ip：{} \n" +
+                            "请求关键路径：{} \n" +
+                            "<<<<<<<<<<<<<过滤Filter By decode记录结束执行>>>>>>>>>>>>>", ipAddr, contextPath);
+                    ResponseTo301.return301((HttpServletResponse) servletResponse, ResponseConstant.NOT_FOUND_URL);
+                }
+            } catch (Exception e) {
+                ResponseTo301.return301((HttpServletResponse) servletResponse, ResponseConstant.NOT_FOUND_URL);
+            }
         }
     }
 
