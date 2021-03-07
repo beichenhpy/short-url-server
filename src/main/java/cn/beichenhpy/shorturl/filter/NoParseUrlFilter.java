@@ -2,7 +2,7 @@ package cn.beichenhpy.shorturl.filter;
 
 import cn.beichenhpy.shorturl.utils.HexUtil;
 import cn.beichenhpy.shorturl.utils.IpUtil;
-import cn.beichenhpy.shorturl.utils.ResponseTo301;
+import cn.beichenhpy.shorturl.utils.ResponseToCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -80,7 +80,7 @@ public class NoParseUrlFilter implements Filter {
                         "请求ip：{} \n" +
                         "请求关键路径：{} \n" +
                         "<<<<<<<<<<<<<过滤Filter By Map记录结束执行>>>>>>>>>>>>>", ipAddr, contextPath);
-                ResponseTo301.return301((HttpServletResponse) servletResponse, (HttpServletRequest) servletRequest);
+                ResponseToCode.return404((HttpServletResponse) servletResponse, (HttpServletRequest) servletRequest);
             } else {
                 log.info("<<<<<<<<<<<<<通过Map检测|允许通过>>>>>>>>>>>>>");
                 filterChain.doFilter(servletRequest, servletResponse);
@@ -109,10 +109,10 @@ public class NoParseUrlFilter implements Filter {
                             "请求ip：{} \n" +
                             "请求关键路径：{} \n" +
                             "<<<<<<<<<<<<<过滤Filter By decode记录结束执行>>>>>>>>>>>>>", ipAddr, contextPath);
-                    ResponseTo301.return301((HttpServletResponse) servletResponse, (HttpServletRequest) servletRequest);
+                    ResponseToCode.return404((HttpServletResponse) servletResponse, (HttpServletRequest) servletRequest);
                 }
             } catch (Exception e) {
-                ResponseTo301.return301((HttpServletResponse) servletResponse, (HttpServletRequest) servletRequest);
+                ResponseToCode.return404((HttpServletResponse) servletResponse, (HttpServletRequest) servletRequest);
             }
         }
     }

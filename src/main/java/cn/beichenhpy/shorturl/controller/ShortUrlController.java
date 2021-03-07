@@ -4,10 +4,9 @@ import cn.beichenhpy.shorturl.anno.SysLog;
 import cn.beichenhpy.shorturl.constant.Result;
 import cn.beichenhpy.shorturl.exception.NoSuchUrlException;
 import cn.beichenhpy.shorturl.service.IShortUrlService;
-import cn.beichenhpy.shorturl.utils.ResponseTo301;
+import cn.beichenhpy.shorturl.utils.ResponseToCode;
 import cn.beichenhpy.shorturl.utils.UrlValid;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -71,6 +70,6 @@ public class ShortUrlController {
         if (originUrl == null){
             throw new NoSuchUrlException();
         }
-        ResponseTo301.return301(response,request);
+        ResponseToCode.return301(response,originUrl);
     }
 }

@@ -1,7 +1,7 @@
 package cn.beichenhpy.shorturl.exceptionHanlder;
 
 import cn.beichenhpy.shorturl.exception.NoSuchUrlException;
-import cn.beichenhpy.shorturl.utils.ResponseTo301;
+import cn.beichenhpy.shorturl.utils.ResponseToCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,6 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 public class MyExceptionHandler{
     @ExceptionHandler(NoSuchUrlException.class)
     public void globalException(HttpServletResponse response, HttpServletRequest request, NoSuchUrlException ex){
-        ResponseTo301.return301(response, request);
+        ResponseToCode.return404(response, request);
     }
 }
