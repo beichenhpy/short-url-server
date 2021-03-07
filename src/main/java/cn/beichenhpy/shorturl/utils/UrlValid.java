@@ -2,6 +2,7 @@ package cn.beichenhpy.shorturl.utils;
 
 import cn.beichenhpy.shorturl.config.BlackUrlLoad;
 
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -19,6 +20,8 @@ public class UrlValid {
      * @return 验证成功返回true，验证失败返回false
      */
     public static boolean checkUrl(String url) {
+        //将url换成小写的方便判断验证
+        url = url.toLowerCase(Locale.ROOT);
         boolean matches = Pattern.matches(URL_REGEX, url);
         Set<String> blackUrls = BlackUrlLoad.BLACK_URLS;
         boolean result = true;
