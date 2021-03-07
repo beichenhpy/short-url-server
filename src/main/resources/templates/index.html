@@ -4,21 +4,24 @@
     <meta charset="UTF-8">
     <title>北辰短链接服务</title>
     <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script type="text/javascript">
-        function add(){
-            var originUrl = document.getElementById("addId").value;
+        function add() {
+            var originUrl = document.getElementById("url").value;
             var host = window.location.href;
             var method = "api/add"
             $.ajax(
                 {
-                    type:"POST",
-                    url:host + method,
-                    data:{originUrl:originUrl},
-                    dataType:"json",
-                    success:function (res){
-                        if (res.success){
-                            alert("你的短链接为："+host + res.result);
-                        }else {
+                    type: "POST",
+                    url: host + method,
+                    data: {originUrl: originUrl},
+                    dataType: "json",
+                    success: function (res) {
+                        if (res.success) {
+                            $('#sUrlDiv').removeClass("hidden")
+                            $('#sUrl').html(host + res.result);
+                        } else {
                             alert(res.message)
                         }
                     }
@@ -28,39 +31,36 @@
     </script>
 </head>
 <body>
-<div class="body">
-    <div class="pic">
-        <img class="logo" src="https://avatars2.githubusercontent.com/u/48054031?s=60&amp;v=4"  alt="beichenhpy"/>
+<div class="container">
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <img class="img-responsive center-block" alt="Cinque Terre" width="125" height="125"
+                 src="https://avatars2.githubusercontent.com/u/48054031?s=60&amp;v=4"/>
+            <h3 class="text-center">
+                短链接生成器
+            </h3>
+            <div class="form-group">
+                <label for="url">输入需要转换的链接</label>
+                <textarea placeholder="输入http/https" class="form-control" rows="3" id="url"></textarea>
+            </div>
+        <button type="button" class="btn btn-success" onclick="add()"><span class="glyphicon glyphicon-send" aria-hidden="true"></span> 生成</button>
+        </div>
     </div>
-    <div class="addElement">
-        <label for="addId"></label>
-        <input class="input" type="text" id="addId" value="" placeholder="请输入http/https"/>
-        <input class="btn" type="submit" value="生成短链接" onclick="add()"/>
+    <h3></h3>
+    <div class="alert alert-dismissable alert-success hidden" id="sUrlDiv">
+        <h4>
+            短网址
+        </h4> <strong id="sUrl"></strong>
+
     </div>
 </div>
 </body>
 <style type="text/css">
-    body{
+    body {
         background-color: black;
     }
-    .pic{
-        text-align:center;
-        margin-bottom:30px;}
-    .logo{
-        height:200px;
-        width:270px;}
-    .addElement{
-        text-align:center;}
-    .input{
-        width:540px;
-        height:36px;}
-    .btn{
-        border:0;
-        margin-left: 10px;
-        width:100px;
-        height:40px;
-        background:#36F;
-        font-size:15px;
-        color:#fff;}
+    .container {
+        margin-top: 40px;
+    }
 </style>
 </html>
