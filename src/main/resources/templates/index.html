@@ -20,7 +20,7 @@
                     success: function (res) {
                         if (res.success) {
                             $('#sUrlDiv').removeClass("hidden")
-                            $('#sUrl').html(host + res.result);
+                            $('#sUrl').html(host + "/" +res.result);
                         } else {
                             alert(res.message)
                         }
