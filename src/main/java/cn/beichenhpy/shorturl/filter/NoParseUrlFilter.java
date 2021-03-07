@@ -51,11 +51,10 @@ public class NoParseUrlFilter implements Filter {
         /*  条件说明
             这里的判断 对已经在parseFilterMap中的path
             相当于是对一些不需要过滤的进行判断或者一些已经确定一定要过滤的进行过滤
-         *  parseMap.size() > 0 用于判断Map是否为空，不为空才能进行下一步判断
          *  parseMap.containsKey(contextPath) 进行查询path是否需要进行判断 第一个满足才会执行
          *  parseMap.get(contextPath) 对需要进行判断的path判断是否放行（根据value的值）
          */
-        if (parseFilterMap.size() > 0 && parseFilterMap.containsKey(contextPath)) {
+        if (parseFilterMap.containsKey(contextPath)) {
             if (parseFilterMap.get(contextPath)) {
                 log.info("\n<<<<<<<<<<<<<过滤Filter By Map记录开始执行>>>>>>>>>>>>>\n" +
                         "请求ip：{} \n" +
