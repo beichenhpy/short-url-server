@@ -20,6 +20,7 @@ public class ResponseToCode {
      */
     public static HttpServletResponse return404(HttpServletResponse response, HttpServletRequest request) {
         String server = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/404";
+        //这里的server也可以直接为后缀 example "/404"
         return301(response, server);
         return response;
     }
