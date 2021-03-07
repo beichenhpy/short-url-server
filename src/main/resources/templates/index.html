@@ -9,8 +9,8 @@
     <script type="text/javascript">
         function add() {
             var originUrl = document.getElementById("url").value;
-            var host = window.location.href;
-            var method = "api/add"
+            var host = window.location.protocol +'//'+ window.location.host;
+            var method = "/api/add"
             $.ajax(
                 {
                     type: "POST",

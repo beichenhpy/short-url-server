@@ -1,7 +1,5 @@
 package cn.beichenhpy.shorturl.filter;
 
-import cn.beichenhpy.shorturl.constant.ResponseConstant;
-import cn.beichenhpy.shorturl.exception.NoSuchUrlException;
 import cn.beichenhpy.shorturl.utils.HexUtil;
 import cn.beichenhpy.shorturl.utils.IpUtil;
 import cn.beichenhpy.shorturl.utils.ResponseTo301;
@@ -22,6 +20,28 @@ import java.util.Map;
  * @description 过滤某些请求
  * 不会记录在数据库中，相当于跳过某些请求，不进入controller
  * 这样可以节省数据库资源或者一些不必要的风险
+ * DDos防御做在了nginx中
+ * nginx配置:
+ * http {
+ *    #访问限制
+ *     limit_req_zone  $binary_remote_addr  zone=mylimit:10m  rate=1r/s;
+ *      server {
+ *          listen      80;
+ *          server_name   你的域名;
+ *          charset utf-8;
+ *          location / {
+ *              limit_req zone=mylimit burst=1 nodelay;
+ *              proxy_set_header   X-Real-IP $remote_addr;
+ *              proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+ *              proxy_set_header   Host      $http_host;
+ *              proxy_http_version 1.1;
+ *              proxy_set_header Upgrade $http_upgrade;
+ *              proxy_set_header Connection "upgrade";
+ *              proxy_pass         http://0.0.0.0:9999/;
+ *          }
+ *      }
+ * }
+ *
  * @since 2021/3/1 15:23
  */
 @Component
@@ -60,14 +80,15 @@ public class NoParseUrlFilter implements Filter {
                         "请求ip：{} \n" +
                         "请求关键路径：{} \n" +
                         "<<<<<<<<<<<<<过滤Filter By Map记录结束执行>>>>>>>>>>>>>", ipAddr, contextPath);
-                ResponseTo301.return301((HttpServletResponse) servletResponse, ResponseConstant.NOT_FOUND_URL);
+                ResponseTo301.return301((HttpServletResponse) servletResponse, (HttpServletRequest) servletRequest);
             } else {
                 log.info("<<<<<<<<<<<<<通过Map检测|允许通过>>>>>>>>>>>>>");
                 filterChain.doFilter(servletRequest, servletResponse);
             }
         } else {
             /* 条件是：Map为空/请求的path不包含在key中
-              这里防止DDos对数据库负载
+              主要针对短链接转发进行过滤
+              这里防止无用的链接对数据库负载例如（胡乱写的一些字符？ sjdkal,dassa,dsad）
               增加对短链接的逆向判断
               如果为雪花算法生成，转换为10进制长度应该为18/19
              */
@@ -88,10 +109,10 @@ public class NoParseUrlFilter implements Filter {
                             "请求ip：{} \n" +
                             "请求关键路径：{} \n" +
                             "<<<<<<<<<<<<<过滤Filter By decode记录结束执行>>>>>>>>>>>>>", ipAddr, contextPath);
-                    ResponseTo301.return301((HttpServletResponse) servletResponse, ResponseConstant.NOT_FOUND_URL);
+                    ResponseTo301.return301((HttpServletResponse) servletResponse, (HttpServletRequest) servletRequest);
                 }
             } catch (Exception e) {
-                ResponseTo301.return301((HttpServletResponse) servletResponse, ResponseConstant.NOT_FOUND_URL);
+                ResponseTo301.return301((HttpServletResponse) servletResponse, (HttpServletRequest) servletRequest);
             }
         }
     }
@@ -100,7 +121,7 @@ public class NoParseUrlFilter implements Filter {
      * 将是否进行过滤的url放入
      */
     private void initParseMap() {
-        /*过滤*/
+        /*过滤 一些已经知道的有风险的路径*/
         parseFilterMap.put("/favicon.ico", true);
         parseFilterMap.put("/robots.txt", true);
         parseFilterMap.put("/wcm", true);
@@ -108,8 +129,11 @@ public class NoParseUrlFilter implements Filter {
         parseFilterMap.put("/phpMyAdmin", true);
         parseFilterMap.put("/4e5e5d7364f443e28fbf0d3ae744a59a", true);
         parseFilterMap.put("/env", true);
-        /*不过滤*/
+        parseFilterMap.put("/index", true);
+        parseFilterMap.put("/admin", true);
+        /*不过滤 根目录*/
         parseFilterMap.put("/", false);
+        parseFilterMap.put("/404", false);
         parseFilterMap.put("/api/add", false);
     }
 }

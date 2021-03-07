@@ -11,27 +11,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author beichenhpy
  * @version 1.0
  * @description 控制层
- * nginx配置:
-    server {
-        listen      80;
-        server_name   你的域名;
-        charset utf-8;
-        location / {
-            proxy_set_header   X-Real-IP $remote_addr;
-            proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header   Host      $http_host;
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection "upgrade";
-            proxy_pass         http://0.0.0.0:9999/;
-        }
-    }
+ *
  *
  *
  * @since 2021/3/1 11:05
@@ -48,6 +35,15 @@ public class ShortUrlController {
     @GetMapping("")
     public String index(){
         return "index";
+    }
+
+    /**
+     * 首页
+     * @return 返回index.html
+     */
+    @GetMapping("/404")
+    public String notFound(){
+        return "404";
     }
 
     @SysLog("请求添加短链接")
@@ -70,11 +66,11 @@ public class ShortUrlController {
      */
     @SysLog(value = "请求短链接api")
     @GetMapping("/{path}")
-    public void returnShort(@PathVariable("path") String path, HttpServletResponse response){
+    public void returnShort(@PathVariable("path") String path, HttpServletResponse response, HttpServletRequest request){
         String originUrl = defaultShortUrlServiceImpl.getOriginUrl(path);
         if (originUrl == null){
             throw new NoSuchUrlException();
         }
-        ResponseTo301.return301(response,originUrl);
+        ResponseTo301.return301(response,request);
     }
 }
