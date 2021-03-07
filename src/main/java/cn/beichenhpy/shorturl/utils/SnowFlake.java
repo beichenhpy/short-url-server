@@ -7,9 +7,9 @@ public class SnowFlake {
 
 
     /**
-     * 起始的时间戳
+     * 起始的时间戳 2021-01-01 00:00:00
      */
-    private final static long START_TMP = 1615021877181L;
+    private final static long START_TMP = 1609430400000L;
 
     /**
      * 每一部分占用的位数
@@ -98,8 +98,8 @@ public class SnowFlake {
     }
 
     public static void main(String[] args) {
-        SnowFlake snowFlake = new SnowFlake(2, 3);
-        for (int i = 0; i < 10000000; i++) {
+        SnowFlake snowFlake = new SnowFlake(1, 1);
+        for (int i = 0; i < 5000; i++) {
             System.out.println(snowFlake.nextId());
         }
     }

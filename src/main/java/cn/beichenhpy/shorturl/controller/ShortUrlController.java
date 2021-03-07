@@ -1,13 +1,9 @@
 package cn.beichenhpy.shorturl.controller;
 
 import cn.beichenhpy.shorturl.anno.SysLog;
-import cn.beichenhpy.shorturl.constant.Result;
 import cn.beichenhpy.shorturl.exception.NoSuchUrlException;
-import cn.beichenhpy.shorturl.model.UrlInfo;
 import cn.beichenhpy.shorturl.service.IShortUrlService;
 import cn.beichenhpy.shorturl.utils.ResponseTo301;
-import cn.beichenhpy.shorturl.utils.UrlValid;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO 控制层 可以在nginx反向代理一下 使用域名 proxy_pass localhost:9999/api
+ * @description 控制层
  * nginx配置:
     server {
         listen      80;
@@ -30,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "upgrade";
-            proxy_pass         http://0.0.0.0:9999/api/;
+            proxy_pass         http://0.0.0.0:9999/;
         }
     }
  *
@@ -38,12 +34,24 @@ import javax.servlet.http.HttpServletResponse;
  * @since 2021/3/1 11:05
  */
 @Controller
-@RequestMapping("/api")
 public class ShortUrlController {
 
     @Resource(name = "defaultShortUrlServiceImpl")
     private IShortUrlService defaultShortUrlServiceImpl;
+    /**
+     * 首页
+     * @return 返回index.html
+     */
+    @GetMapping("")
+    public String index(){
+        return "index";
+    }
 
+    /**
+     * 如果已有的path中没出现的path才会执行这个请求
+     * @param path 短链接
+     * @param response response
+     */
     @SysLog(value = "请求短链接api")
     @GetMapping("/{path}")
     public void returnShort(@PathVariable("path") String path, HttpServletResponse response){
@@ -52,19 +60,5 @@ public class ShortUrlController {
             throw new NoSuchUrlException();
         }
         ResponseTo301.return301(response,originUrl);
-    }
-
-    @SysLog(value = "添加短链接")
-    @PostMapping("/add")
-    @ResponseBody
-    public Result<?> add(@RequestBody UrlInfo urlInfo){
-        //验证url是否合法
-        boolean isLegal = UrlValid.checkUrl(urlInfo.getOriginUrl());
-        if (isLegal){
-            String shortUrl = defaultShortUrlServiceImpl.addUrlInfo(urlInfo);
-            return Result.ok(shortUrl);
-        }else {
-            return Result.error("错误的链接或被禁用的链接");
-        }
     }
 }

@@ -1,11 +1,13 @@
 package cn.beichenhpy.shorturl.service.Impl;
 
+import cn.beichenhpy.shorturl.anno.SysLog;
 import cn.beichenhpy.shorturl.model.UrlInfo;
 import cn.beichenhpy.shorturl.mapper.ShortUrlMapper;
 import cn.beichenhpy.shorturl.service.IShortUrlService;
 import cn.beichenhpy.shorturl.utils.HexUtil;
 import cn.beichenhpy.shorturl.utils.RedisUtil;
 import cn.beichenhpy.shorturl.utils.SnowFlake;
+import cn.beichenhpy.shorturl.utils.UrlValid;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -58,18 +60,26 @@ public class DefaultShortUrlServiceImpl extends ServiceImpl<ShortUrlMapper, UrlI
         return originUrl;
     }
 
+    @SysLog(value = "添加短链接")
     @Override
-    public String addUrlInfo(UrlInfo urlInfo) {
-        //查询是否重复
-        List<UrlInfo> repeatList = shortUrlMapper.selectList(new QueryWrapper<UrlInfo>().eq("origin_url", urlInfo.getOriginUrl()));
-        if (repeatList.size() > 0) {
-            //重复返回第一个
-            return repeatList.get(0).getShortUrl();
-        } else {
-            String shortUrl = HexUtil.convertTo(idWorker.nextId(), 62);
-            urlInfo.setShortUrl(shortUrl);
-            shortUrlMapper.insert(urlInfo);
-            return shortUrl;
+    public String addUrlInfo(String originUrl) {
+        boolean isLegal = UrlValid.checkUrl(originUrl);
+        if (isLegal){
+            //查询是否重复
+            List<UrlInfo> repeatList = shortUrlMapper.selectList(new QueryWrapper<UrlInfo>().eq("origin_url", originUrl));
+            if (repeatList.size() > 0) {
+                //重复返回第一个
+                return repeatList.get(0).getShortUrl();
+            } else {
+                String shortUrl = HexUtil.convertTo(idWorker.nextId(), 62);
+                UrlInfo urlInfo = new UrlInfo();
+                urlInfo.setOriginUrl(originUrl);
+                urlInfo.setShortUrl(shortUrl);
+                shortUrlMapper.insert(urlInfo);
+                return shortUrl;
+            }
+        }else {
+            return null;
         }
     }
 }

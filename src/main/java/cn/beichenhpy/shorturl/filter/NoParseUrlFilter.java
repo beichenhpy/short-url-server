@@ -71,12 +71,16 @@ public class NoParseUrlFilter implements Filter {
               增加对短链接的逆向判断
               如果为雪花算法生成，转换为10进制长度应该为18/19
              */
-            //去除prefix /api
-            String pureContext = contextPath.substring(contextPath.substring(contextPath.indexOf("/") + 1).indexOf("/") + 2);
+            //去除prefix
+            String pureContext = contextPath.substring(1);
+            //如果最后有斜杠 去除
+            if (pureContext.lastIndexOf("/") != -1){
+                pureContext = pureContext.substring(0,pureContext.length() - 1);
+            }
             //尝试decode 62to10
             try {
                 long decodeNum = HexUtil.revertToLong(pureContext, 62);
-                if (String.valueOf(decodeNum).length() == 13) {
+                if (String.valueOf(decodeNum).length() >= 17) {
                     log.info("<<<<<<<<<<<<<长度满足|允许通过>>>>>>>>>>>>>");
                     filterChain.doFilter(servletRequest, servletResponse);
                 } else {
@@ -97,14 +101,14 @@ public class NoParseUrlFilter implements Filter {
      */
     private void initParseMap() {
         /*过滤*/
-        parseFilterMap.put("/api/favicon.ico", true);
-        parseFilterMap.put("/api/robots.txt", true);
-        parseFilterMap.put("/api/wcm", true);
-        parseFilterMap.put("/api/phpmyadmin", true);
-        parseFilterMap.put("/api/phpMyAdmin", true);
-        parseFilterMap.put("/api/4e5e5d7364f443e28fbf0d3ae744a59a", true);
-        parseFilterMap.put("/api/env", true);
+        parseFilterMap.put("/favicon.ico", true);
+        parseFilterMap.put("/robots.txt", true);
+        parseFilterMap.put("/wcm", true);
+        parseFilterMap.put("/phpmyadmin", true);
+        parseFilterMap.put("/phpMyAdmin", true);
+        parseFilterMap.put("/4e5e5d7364f443e28fbf0d3ae744a59a", true);
+        parseFilterMap.put("/env", true);
         /*不过滤*/
-        parseFilterMap.put("/api/add", false);
+        parseFilterMap.put("/", false);
     }
 }

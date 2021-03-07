@@ -9,14 +9,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.PropertyFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -68,7 +64,7 @@ public class SysLogAspect {
             value = sysLog.value();
         }
         //获取参数
-        String params = getParams(httpServletRequest, point);
+        String params = getParamByReflect(point);
         Date createTime = new Date();
         long entTime = System.currentTimeMillis();
         //新建日志实体类
@@ -90,49 +86,31 @@ public class SysLogAspect {
                 "请求时间：{}\n"+
                 "<<<<<<<<<<<<<日志记录执行结束>>>>>>>>>>>>>",ipAddr,methodName,value,entTime - startTime,params,createTime);
     }
-
-    public String getParams(HttpServletRequest request,ProceedingJoinPoint joinPoint){
-        String httpMethod = request.getMethod();
-        //转换成enum类型
-        HttpMethod httpMethodEnum = HttpMethod.valueOf(httpMethod);
-        StringBuilder params = new StringBuilder();
-        //如果为有可能用到request和response的请求 理论上是 post/put/patch 但是这里我用了get
-        if (HttpMethod.POST.equals(httpMethodEnum) || HttpMethod.PUT.equals(httpMethodEnum) || HttpMethod.PATCH.equals(httpMethodEnum) || HttpMethod.GET.equals(httpMethodEnum)) {
-            //通过切面获取所有参数
-            Object[] paramsArray = joinPoint.getArgs();
-            // java.lang.IllegalStateException: It is illegal to call this method if the current request is not in asynchronous mode (i.e. isAsyncStarted() returns false)
-            //  https://my.oschina.net/mengzhang6/blog/2395893
-            //放在中间变量中
-            Object[] arguments  = new Object[paramsArray.length];
-            for (int i = 0; i < paramsArray.length; i++) {
-                if (paramsArray[i] instanceof ServletRequest || paramsArray[i] instanceof ServletResponse || paramsArray[i] instanceof MultipartFile) {
-                    //ServletRequest不能序列化，从入参里排除，否则报异常：java.lang.IllegalStateException: It is illegal to call this method if the current request is not in asynchronous mode (i.e. isAsyncStarted() returns false)
-                    //ServletResponse不能序列化 从入参里排除，否则报异常：java.lang.IllegalStateException: getOutputStream() has already been called for this response
-                    continue;
-                }
-                arguments[i] = paramsArray[i];
+    /**
+     * 直接通过反射获取参数
+     * @param point 切点
+     * @return 返回String构造器
+     */
+    private String getParamByReflect(ProceedingJoinPoint point){
+        StringBuilder params;
+        //通过切面获取所有参数
+        Object[] paramsArray = point.getArgs();
+        // java.lang.IllegalStateException: It is illegal to call this method if the current request is not in asynchronous mode (i.e. isAsyncStarted() returns false)
+        //  https://my.oschina.net/mengzhang6/blog/2395893
+        //放在中间变量中
+        Object[] arguments  = new Object[paramsArray.length];
+        for (int i = 0; i < paramsArray.length; i++) {
+            if (paramsArray[i] instanceof ServletRequest || paramsArray[i] instanceof ServletResponse || paramsArray[i] instanceof MultipartFile) {
+                //ServletRequest不能序列化，从入参里排除，否则报异常：java.lang.IllegalStateException: It is illegal to call this method if the current request is not in asynchronous mode (i.e. isAsyncStarted() returns false)
+                //ServletResponse不能序列化 从入参里排除，否则报异常：java.lang.IllegalStateException: getOutputStream() has already been called for this response
+                continue;
             }
-            //update-begin-author:taoyan date:20200724 for:日志数据太长的直接过滤掉
-            PropertyFilter profiler = (o, name, value) -> {
-                return value == null || value.toString().length() <= 500;
-            };
-            params = new StringBuilder(JSONObject.toJSONString(arguments, profiler));
-            //update-end-author:taoyan date:20200724 for:日志数据太长的直接过滤掉
-        } else {
-            //不是get/post/put/patch请求则 获取method对象
-            MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-            Method method = signature.getMethod();
-            // 请求的方法参数值
-            Object[] args = joinPoint.getArgs();
-            // 请求的方法参数名称
-            LocalVariableTableParameterNameDiscoverer u = new LocalVariableTableParameterNameDiscoverer();
-            String[] paramNames = u.getParameterNames(method);
-            if (args != null && paramNames != null) {
-                for (int i = 0; i < args.length; i++) {
-                    params.append("  ").append(paramNames[i]).append(": ").append(args[i]);
-                }
-            }
+            arguments[i] = paramsArray[i];
         }
+        //update-begin-author:taoyan date:20200724 for:日志数据太长的直接过滤掉
+        PropertyFilter profiler = (o, name, value) -> value == null || value.toString().length() <= 500;
+        params = new StringBuilder(JSONObject.toJSONString(arguments, profiler));
+        //update-end-author:taoyan date:20200724 for:日志数据太长的直接过滤掉
         return params.toString();
     }
 }
