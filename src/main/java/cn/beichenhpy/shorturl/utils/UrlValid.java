@@ -32,6 +32,8 @@ public class UrlValid {
                     }
                 }
             }
+        }else {
+            result = false;
         }
         return result;
     }

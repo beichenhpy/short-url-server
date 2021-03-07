@@ -1,10 +1,13 @@
 package cn.beichenhpy.shorturl.controller;
 
 import cn.beichenhpy.shorturl.anno.SysLog;
+import cn.beichenhpy.shorturl.constant.Result;
 import cn.beichenhpy.shorturl.exception.NoSuchUrlException;
 import cn.beichenhpy.shorturl.service.IShortUrlService;
 import cn.beichenhpy.shorturl.utils.ResponseTo301;
+import cn.beichenhpy.shorturl.utils.UrlValid;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -45,6 +48,19 @@ public class ShortUrlController {
     @GetMapping("")
     public String index(){
         return "index";
+    }
+
+    @SysLog("请求添加短链接")
+    @ResponseBody
+    @PostMapping("/api/add")
+    public Result<?> add(String originUrl){
+        boolean isLegal = UrlValid.checkUrl(originUrl);
+        if (isLegal){
+            String shortUrl = defaultShortUrlServiceImpl.addUrlInfo(originUrl);
+            return Result.ok(shortUrl);
+        }else {
+            return Result.error("短链接不合法");
+        }
     }
 
     /**

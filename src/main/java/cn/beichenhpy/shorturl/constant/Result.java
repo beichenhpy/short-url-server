@@ -62,18 +62,6 @@ public class Result<T> implements Serializable {
 
     /**
      * 请求成功
-     * @param msg 消息
-     * @return 请求成功
-     */
-    public static Result<Object> ok(String msg) {
-        Result<Object> r = new Result<Object>();
-        r.setSuccess(ResultEnum.REQUEST_OK.getType());
-        r.setCode(ResultEnum.REQUEST_OK.getCode());
-        r.setMessage(msg);
-        return r;
-    }
-    /**
-     * 请求成功
      * @param data 请求结果
      * @return 请求成功
      */

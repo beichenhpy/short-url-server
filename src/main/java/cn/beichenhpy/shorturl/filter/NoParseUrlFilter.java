@@ -110,5 +110,6 @@ public class NoParseUrlFilter implements Filter {
         parseFilterMap.put("/env", true);
         /*不过滤*/
         parseFilterMap.put("/", false);
+        parseFilterMap.put("/api/add", false);
     }
 }

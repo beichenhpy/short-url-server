@@ -12,8 +12,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -23,19 +25,17 @@ import java.util.List;
  * @since 2021/3/1 14:00
  */
 @Slf4j
-@Service
+@Service("defaultShortUrlServiceImpl")
 public class DefaultShortUrlServiceImpl extends ServiceImpl<ShortUrlMapper, UrlInfo> implements IShortUrlService {
 
     private static final String CACHE_PATH = "url:";
-    private final ShortUrlMapper shortUrlMapper;
-    private final SnowFlake idWorker;
-    private final RedisUtil redisUtil;
+    @Resource
+    private ShortUrlMapper shortUrlMapper;
+    @Resource(name = "idWorker")
+    private SnowFlake idWorker;
+    @Resource
+    private RedisUtil redisUtil;
 
-    public DefaultShortUrlServiceImpl(ShortUrlMapper shortUrlMapper, @Qualifier(value = "idWorker") SnowFlake idWorker, RedisUtil redisUtil) {
-        this.shortUrlMapper = shortUrlMapper;
-        this.idWorker = idWorker;
-        this.redisUtil = redisUtil;
-    }
 
     @Override
     public String getOriginUrl(String shortUrl) {
@@ -53,33 +53,27 @@ public class DefaultShortUrlServiceImpl extends ServiceImpl<ShortUrlMapper, UrlI
             //放入redis
             if (urlInfo != null) {
                 originUrl = urlInfo.getOriginUrl();
-                redisUtil.set(CACHE_PATH + shortUrl, originUrl,60*30);
+                redisUtil.set(CACHE_PATH + shortUrl, originUrl, 60 * 30);
                 log.info("未缓存:设置key");
             }
         }
         return originUrl;
     }
 
-    @SysLog(value = "添加短链接")
     @Override
     public String addUrlInfo(String originUrl) {
-        boolean isLegal = UrlValid.checkUrl(originUrl);
-        if (isLegal){
-            //查询是否重复
-            List<UrlInfo> repeatList = shortUrlMapper.selectList(new QueryWrapper<UrlInfo>().eq("origin_url", originUrl));
-            if (repeatList.size() > 0) {
-                //重复返回第一个
-                return repeatList.get(0).getShortUrl();
-            } else {
-                String shortUrl = HexUtil.convertTo(idWorker.nextId(), 62);
-                UrlInfo urlInfo = new UrlInfo();
-                urlInfo.setOriginUrl(originUrl);
-                urlInfo.setShortUrl(shortUrl);
-                shortUrlMapper.insert(urlInfo);
-                return shortUrl;
-            }
-        }else {
-            return null;
+        //查询是否重复
+        List<UrlInfo> repeatList = shortUrlMapper.selectList(new QueryWrapper<UrlInfo>().eq("origin_url", originUrl));
+        if (repeatList.size() > 0) {
+            //重复返回第一个
+            return repeatList.get(0).getShortUrl();
+        } else {
+            String shortUrl = HexUtil.convertTo(idWorker.nextId(), 62);
+            UrlInfo urlInfo = new UrlInfo();
+            urlInfo.setOriginUrl(originUrl);
+            urlInfo.setShortUrl(shortUrl);
+            shortUrlMapper.insert(urlInfo);
+            return shortUrl;
         }
     }
 }
