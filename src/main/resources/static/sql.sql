@@ -17,6 +17,9 @@ alter table "short-url".url_info
 
 create index url_info_origin_url_index
     on "short-url".url_info (origin_url);
+CREATE INDEX url_info_short_url_idx 
+    ON "short-url".url_info USING btree (short_url);
+
 -- sys_log
 create table "short-url".sys_log
 (
