@@ -13,6 +13,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,18 +46,20 @@ public class SysLogAspect {
     @Around("pointCut()")
     public Object around(ProceedingJoinPoint point) throws Throwable {
         long startTime = System.currentTimeMillis();
-        doLog(startTime,point);
+        //获取request
+        HttpServletRequest httpServletRequest = SpringContextUtils.getHttpServletRequest();
+        SysLogAspect currentBean = SpringContextUtils.getBean(this.getClass());
+        currentBean.doLog(startTime,point,httpServletRequest);
         return point.proceed();
     }
 
-    private void doLog(long startTime,ProceedingJoinPoint point){
+    @Async
+    public void doLog(long startTime, ProceedingJoinPoint point, HttpServletRequest httpServletRequest){
         //获取注解修饰的方法
         String value = "";
         MethodSignature signature = (MethodSignature) point.getSignature();
         Method method = signature.getMethod();
         String methodName = signature.getName();
-        //获取request
-        HttpServletRequest httpServletRequest = SpringContextUtils.getHttpServletRequest();
         //获取真实ip
         String ipAddr = IpUtil.getIpAddr(httpServletRequest);
         //获取注解信息
