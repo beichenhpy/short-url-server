@@ -131,6 +131,7 @@ public class NoParseUrlFilter implements Filter {
         parseFilterMap.put("/env", true);
         parseFilterMap.put("/index", true);
         parseFilterMap.put("/admin", true);
+        parseFilterMap.put("/explicit_not_exist_path", true);
         /*不过滤 根目录*/
         parseFilterMap.put("/", false);
         parseFilterMap.put("/404", false);
