@@ -1,18 +1,14 @@
 package cn.beichenhpy.shorturl.service.Impl;
 
-import cn.beichenhpy.shorturl.anno.SysLog;
 import cn.beichenhpy.shorturl.model.UrlInfo;
 import cn.beichenhpy.shorturl.mapper.ShortUrlMapper;
 import cn.beichenhpy.shorturl.service.IShortUrlService;
 import cn.beichenhpy.shorturl.utils.HexUtil;
 import cn.beichenhpy.shorturl.utils.RedisUtil;
 import cn.beichenhpy.shorturl.utils.SnowFlake;
-import cn.beichenhpy.shorturl.utils.UrlValid;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
