@@ -32,8 +32,9 @@
             <version>1.2.75</version>
         </dependency>
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
